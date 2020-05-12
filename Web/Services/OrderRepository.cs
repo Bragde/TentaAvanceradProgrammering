@@ -22,8 +22,6 @@ namespace Web.Services
         {
             order.OrderPlaced = DateTime.Now;
 
-            _inMemoryOrders.Orders.Add(order);
-
             var shoppingCartItems = _shoppingCart.ShoppingCartItems;
             order.OrderTotal = _shoppingCart.GetShoppingCartTotal();
 
@@ -32,10 +30,11 @@ namespace Web.Services
             foreach (var shoppingCartItem in shoppingCartItems)
             {
                 var orderDetail = new OrderDetail
-                {
-                    Amount = shoppingCartItem.Amount,
+                {                    
                     ProductId = shoppingCartItem.Product.Id,
-                    Price = shoppingCartItem.Product.Price
+                    Product = shoppingCartItem.Product,                    
+                    Price = shoppingCartItem.Product.Price,
+                    Amount = shoppingCartItem.Amount,
                 };
 
                 order.OrderDetails.Add(orderDetail);

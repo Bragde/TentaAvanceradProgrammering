@@ -40,7 +40,7 @@ namespace Web.Controllers
             {
                 _orderRepository.CreateOrder(order);
                 _shoppingCart.ClearCart();
-                return RedirectToAction("CheckoutComplete");
+                return RedirectToAction("PurchaseComplete");
             }
             return View(order);
         }

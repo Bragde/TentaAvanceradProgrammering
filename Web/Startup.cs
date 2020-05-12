@@ -37,6 +37,7 @@ namespace Web
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddScoped<IProductRepository, MockProductRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<InMemoryShoppingCartItems>(sp => InMemoryShoppingCartItems.GetInstance());
             services.AddScoped<InMemoryOrders>(sp => InMemoryOrders.GetInstance());
             services.AddScoped<ShoppingCart>(sp => ShoppingCart.GetCart(sp));
