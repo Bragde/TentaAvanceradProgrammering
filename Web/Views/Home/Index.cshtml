@@ -1,0 +1,25 @@
+﻿@model ProductViewModel
+
+<div class="text-center">
+    <h1 class="display-4">Products</h1>
+    <table>
+        @foreach (var product in Model.Products)
+        {
+            <tr>
+                <td>@product.Name</td>
+                <td>@product.Price</td>
+                <td>
+                    <p class="button">
+                        <a class="btn btn-primary"
+                            asp-controller="ShoppingCart"
+                            asp-action="AddToShoppingCart"
+                            asp-route-productId="@product.Id">
+                            Add to Cart
+                        </a>
+                    </p>
+                </td>
+            </tr>
+        }
+    </table>
+
+</div>
