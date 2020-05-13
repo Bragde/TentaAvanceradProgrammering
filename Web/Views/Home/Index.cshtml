@@ -2,24 +2,26 @@
 
 <div class="text-center">
     <h1 class="display-4">Products</h1>
-    <table>
-        @foreach (var product in Model.Products)
-        {
-            <tr>
-                <td>@product.Name</td>
-                <td>@product.Price</td>
-                <td>
-                    <p class="button">
-                        <a class="btn btn-primary"
-                            asp-controller="ShoppingCart"
-                            asp-action="AddToShoppingCart"
-                            asp-route-productId="@product.Id">
-                            Add to Cart
-                        </a>
-                    </p>
-                </td>
-            </tr>
-        }
-    </table>
-
+    <div class="table-responsive-sm">
+        <table class="table">
+            <tbody>
+                @foreach (var product in Model.Products)
+                {
+                    <tr>
+                        <td class="p-0"><img style="max-width: 150px" src="@product.imageUrl" alt="Product image" /></td>
+                        <td class="text-left">@product.Name</td>
+                        <td>@product.Price€</td>
+                        <td>
+                            <a class="btn btn-sm btn-success"
+                               asp-controller="ShoppingCart"
+                               asp-action="AddToShoppingCart"
+                               asp-route-productId="@product.Id">
+                                Add to Cart
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>

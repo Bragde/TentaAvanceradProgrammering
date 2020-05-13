@@ -26,11 +26,8 @@ namespace Web.Models
 
         [Required(ErrorMessage = "Please enter your address")]
         [StringLength(100)]
-        [Display(Name = "Address Line 1")]
-        public string AddressLine1 { get; set; }
-
-        [Display(Name = "Address Line 2")]
-        public string AddressLine2 { get; set; }
+        [Display(Name = "Address Line")]
+        public string AddressLine { get; set; }
 
         [Required(ErrorMessage = "Please enter your zip code")]
         [Display(Name = "Zip code")]

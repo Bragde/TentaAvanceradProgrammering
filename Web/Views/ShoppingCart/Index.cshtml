@@ -1,36 +1,41 @@
 ﻿@model ShoppingCartViewModel
 
-<h2>Your shopping cart</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Price</th>
-            <th>Amount</th>
-            <th>Subtotal</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.ShoppingCart.ShoppingCartItems)
-        {
-            <tr>
-                <td>@item.Product.Name</td>
-                <td>@item.Product.Price</td>
-                <td>@item.Amount</td>
-                <td>@((item.Amount * item.Product.Price).ToString("c"))</td>
-            </tr>
-        }
-    </tbody>
-    <tfoot>
-        <tr>
-            <td colspan="3" class="text-right">Total:</td>
-            <td class="text-right">
-                @Model.ShoppingCartTotal.ToString("c")
-            </td>
-        </tr>
-    </tfoot>
-</table>
+    <div class="text-center">
+        <h1 class="display-4">Shopping Cart</h1>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th class="text-left">Title</th>
+                    <th>Price</th>
+                    <th class="text-center">Amount</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.ShoppingCart.ShoppingCartItems)
+                {
+                    <tr>
+                        <td class="p-0"><img style="max-width: 150px" src="@item.Product.imageUrl" alt="Product image" /></td>
+                        <td class="text-left">@item.Product.Name</td>
+                        <td>@item.Product.Price€</td>
+                        <td class="text-center">@item.Amount</td>
+                        <td>@((item.Amount * item.Product.Price))€</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" class="text-right">Total:</td>
+                    <td>
+                        @Model.ShoppingCartTotal€
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
 
-<div class="text-center">
-    <a class="btn btn-primary" asp-controller="Order" asp-action="Purchase">Purchase</a>
-</div>
+        <div>
+            <a class="btn btn-primary float-left" asp-controller="Home" asp-action="Index">Continue Shopping</a>
+            <a class="btn btn-success float-right" asp-controller="Order" asp-action="Purchase">Purchase</a>
+        </div>
+    </div>

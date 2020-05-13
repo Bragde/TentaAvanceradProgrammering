@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Web.Models;
 using Web.Services;
+using Web.ViewModels;
 
 namespace Web.Controllers
 {
@@ -14,15 +16,24 @@ namespace Web.Controllers
     {
         private readonly ShoppingCart _shoppingCart;
         private readonly IOrderRepository _orderRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public OrderController(ShoppingCart shoppingCart, IOrderRepository orderRepository)
+        public OrderController(ShoppingCart shoppingCart, 
+            IOrderRepository orderRepository,
+            UserManager<ApplicationUser> userManager)
         {
             _shoppingCart = shoppingCart;
             _orderRepository = orderRepository;
+            _userManager = userManager;
         }
-        public IActionResult Purchase()
+        public async Task<IActionResult> Purchase()
         {
-            return View();
+            var orderViewModel = new OrderViewModel
+            {
+                User = await _userManager.GetUserAsync(User)
+            };
+
+            return View(orderViewModel);
         }
 
         [HttpPost]
