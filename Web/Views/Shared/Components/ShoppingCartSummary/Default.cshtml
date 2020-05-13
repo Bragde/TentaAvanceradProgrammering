@@ -2,12 +2,10 @@
 
 @if (Model.ShoppingCart.ShoppingCartItems.Count > 0)
 {
-    <li>
-        <a>
-            <i class="fas fa-shopping-cart"></i>
-            <span id="cart-status">
-                @Model.ShoppingCart.ShoppingCartItems.Count
-            </span>
-        </a>
-    </li>
+    <a class="nav-link text-dark" asp-controller="ShoppingCart" asp-action="Index">
+        <i class="fas fa-shopping-cart"></i>
+        <span id="cart-status">
+            @Model.ShoppingCart.ShoppingCartItems.Count
+        </span>
+    </a>
 }

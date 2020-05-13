@@ -26,6 +26,7 @@ namespace Web.Controllers
             _orderRepository = orderRepository;
             _userManager = userManager;
         }
+
         public async Task<IActionResult> Purchase()
         {
             var orderViewModel = new OrderViewModel
@@ -37,7 +38,7 @@ namespace Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult Purchase(Order order)
+        public async Task<IActionResult> Purchase(Order order)
         {
             var items = _shoppingCart.GetShoppingCartItems();
             _shoppingCart.ShoppingCartItems = items;
@@ -49,17 +50,28 @@ namespace Web.Controllers
 
             if (ModelState.IsValid)
             {
+                //Add shoppingcart items to order
+                foreach (var item in items)
+                {
+                    var orderDetail = new OrderDetail
+                    {
+                        Product = item.Product,
+                        Amount = item.Amount
+                    };
+                    order.OrderDetails.Add(orderDetail);
+                }
+
+                var vm = new OrderViewModel
+                {
+                    Order = order,
+                    User = await _userManager.GetUserAsync(User)
+                };
+
                 _orderRepository.CreateOrder(order);
                 _shoppingCart.ClearCart();
-                return RedirectToAction("PurchaseComplete");
+                return View("PurchaseComplete", vm);
             }
-            return View(order);
-        }
-
-        public IActionResult PurchaseComplete()
-        {
-            ViewBag.PurchaseCompleteMessage = "Thanks for your order.";
-            return View();
+            return View(new OrderViewModel());
         }
     }
 }

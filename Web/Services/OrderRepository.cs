@@ -31,9 +31,7 @@ namespace Web.Services
             {
                 var orderDetail = new OrderDetail
                 {                    
-                    ProductId = shoppingCartItem.Product.Id,
                     Product = shoppingCartItem.Product,                    
-                    Price = shoppingCartItem.Product.Price,
                     Amount = shoppingCartItem.Amount,
                 };
 

@@ -1,1 +1,55 @@
-﻿<h1>@ViewBag.PurchaseCompleteMessage </h1>
+﻿@model OrderViewModel
+
+<h4 class="mb-3">Thank you for your order!</h4>
+
+<h6>Order id: @Model.Order.OrderId<br />
+    Order date: @Model.Order.OrderPlaced</h6>
+
+<h6>Shipping details</h6>
+<hr class="m-0"/>
+<div class="ml-3">
+    <p>
+        @Model.User.FirstName @Model.User.LastName<br />
+        @Model.User.AdressLine<br />
+        @Model.User.ZipCode @Model.User.City<br />
+        @if (string.IsNullOrEmpty(@Model.User.State))
+        {
+            <span>@Model.User.State </span>
+        }
+        @Model.User.Country
+    </p>
+</div>
+
+<h6>Products</h6>
+<hr class="m-0" />
+<div class="ml-3">
+    <table class="table table-sm table-borderless">
+        <thead>
+            <tr>
+                <th class="text-left">Title</th>
+                <th>Price</th>
+                <th class="text-center">Amount</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Order.OrderDetails)
+            {
+                <tr>
+                    <td class="text-left">@item.Product.Name</td>
+                    <td>@item.Product.Price€</td>
+                    <td class="text-center">@item.Amount</td>
+                    <td>@((item.Amount * item.Product.Price))€</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" class="text-right">Total:</td>
+                <td>
+                    @Model.Order.OrderTotal€
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

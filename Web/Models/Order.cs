@@ -9,6 +9,11 @@ namespace Web.Models
 {
     public class Order
     {
+        public Order()
+        {
+            OrderDetails = new List<OrderDetail>();
+        }
+
         [BindNever]
         public int OrderId { get; set; }
 
