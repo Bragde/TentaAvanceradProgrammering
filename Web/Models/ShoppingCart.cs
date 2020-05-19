@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using CatalogService.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -34,7 +35,7 @@ namespace Web.Models
             return new ShoppingCart(context);
         }
 
-        public void AddToCart(Product product, int amount)
+        public void AddToCart(CatalogItemDto product, int amount)
         {
             var shoppingCartItem =
                     _inMemoryShoppingCartItems.ShoppingCartItems.SingleOrDefault(
@@ -57,7 +58,7 @@ namespace Web.Models
             }
         }
 
-        public int RemoveFromCart(Product product)
+        public int RemoveFromCart(CatalogItemDto product)
         {
             var shoppingCartItem =
                     _inMemoryShoppingCartItems.ShoppingCartItems.SingleOrDefault(

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CatalogService.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,6 +9,6 @@ namespace Web.ViewModels
 {
     public class ProductViewModel
     {
-        public IEnumerable<Product> Products { get; set; }
+        public IEnumerable<CatalogItemDto> Products { get; set; }
     }
 }
