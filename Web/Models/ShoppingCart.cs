@@ -9,29 +9,11 @@ namespace Web.Models
 {
     public class ShoppingCart
     {
-        private readonly InMemoryShoppingCartItems _inMemoryShoppingCartItems;
 
         public string ShoppingCartId { get; set; }
         public List<ShoppingCartItem> ShoppingCartItems { get; set; }
 
-        private ShoppingCart(InMemoryShoppingCartItems inMemoryShoppingCartItems)
-        {
-            _inMemoryShoppingCartItems = inMemoryShoppingCartItems;
-        }
 
-        public static ShoppingCart GetCart(IServiceProvider services)
-        {
-            ISession session = services.GetRequiredService<IHttpContextAccessor>()?
-                .HttpContext.Session;
-
-            var context = services.GetService<InMemoryShoppingCartItems>();
-
-            string cartId = session.GetString("CartId") ?? Guid.NewGuid().ToString();
-
-            session.SetString("CartId", cartId);
-
-            return new ShoppingCart(context);
-        }
 
         //public void AddToCart(CatalogItemDto product, int amount)
         //{
