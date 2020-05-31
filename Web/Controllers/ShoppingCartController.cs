@@ -22,7 +22,7 @@ namespace Web.Controllers
         private readonly string _shoppingCartServiceRoot;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public ShoppingCartController(ShoppingCart shoppingCart,
+        public ShoppingCartController(
             IHttpClientFactory clientFactory,
             IConfiguration config,
             UserManager<ApplicationUser> userManager)
