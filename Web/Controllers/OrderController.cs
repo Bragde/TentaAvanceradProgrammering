@@ -37,41 +37,41 @@ namespace Web.Controllers
             return View(orderViewModel);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Purchase(Order order)
-        {
-            var items = _shoppingCart.GetShoppingCartItems();
-            _shoppingCart.ShoppingCartItems = items;
+        //[HttpPost]
+        //public async Task<IActionResult> Purchase(Order order)
+        //{
+        //    var items = _shoppingCart.GetShoppingCartItems();
+        //    _shoppingCart.ShoppingCartItems = items;
 
-            if (_shoppingCart.ShoppingCartItems.Count == 0)
-            {
-                ModelState.AddModelError("", "Your cart is empty, add some products first");
-            }
+        //    if (_shoppingCart.ShoppingCartItems.Count == 0)
+        //    {
+        //        ModelState.AddModelError("", "Your cart is empty, add some products first");
+        //    }
 
-            if (ModelState.IsValid)
-            {
-                //Add shoppingcart items to order
-                foreach (var item in items)
-                {
-                    var orderDetail = new OrderDetail
-                    {
-                        Product = item.Product,
-                        Amount = item.Amount
-                    };
-                    order.OrderDetails.Add(orderDetail);
-                }
+        //    if (ModelState.IsValid)
+        //    {
+        //        //Add shoppingcart items to order
+        //        foreach (var item in items)
+        //        {
+        //            var orderDetail = new OrderDetail
+        //            {
+        //                Product = item.Product,
+        //                Amount = item.Amount
+        //            };
+        //            order.OrderDetails.Add(orderDetail);
+        //        }
 
-                var vm = new OrderViewModel
-                {
-                    Order = order,
-                    User = await _userManager.GetUserAsync(User)
-                };
+        //        var vm = new OrderViewModel
+        //        {
+        //            Order = order,
+        //            User = await _userManager.GetUserAsync(User)
+        //        };
 
-                _orderRepository.CreateOrder(order);
-                _shoppingCart.ClearCart();
-                return View("PurchaseComplete", vm);
-            }
-            return View(new OrderViewModel());
-        }
+        //        _orderRepository.CreateOrder(order);
+        //        _shoppingCart.ClearCart();
+        //        return View("PurchaseComplete", vm);
+        //    }
+        //    return View(new OrderViewModel());
+        //}
     }
 }

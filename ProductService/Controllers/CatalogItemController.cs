@@ -11,14 +11,14 @@ using Microsoft.Extensions.Logging;
 namespace CatalogService.Controllers
 {
     [ApiController]
-    [Route("catalogservice/catalogitem")]
+    [Route("catalogservice/catalogitems")]
     public class CatalogItemController : ControllerBase
     {
         private readonly ICatalogRepository _catalogRepository;
 
         public CatalogItemController(ICatalogRepository catalogRepository)
         {
-            _catalogRepository = catalogRepository;
+            _catalogRepository = catalogRepository ?? throw new ArgumentNullException(nameof(catalogRepository));
         }
 
         [HttpGet]
@@ -26,16 +26,25 @@ namespace CatalogService.Controllers
         {
             var items = _catalogRepository.GettAll();
 
-            var itemsDto = items.Select(x => new CatalogItemDto
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Price = x.Price,
-                    ImageUrl = x.ImageUrl
-                })
-                .ToList();
+            if (items == null)
+                return NotFound();
+
+            var itemsDto = items.Select(x => new CatalogItemDto(x)).ToList();
 
             return Ok(itemsDto);
+        }
+
+        [HttpGet("{catalogItemId}")]
+        public ActionResult<CatalogItemDto> GetById(Guid catalogItemId)
+        {
+            var item =  _catalogRepository.GetById(catalogItemId);
+
+            if (item == null)
+                return NotFound();
+
+            var itemDto = new CatalogItemDto(item);
+
+            return Ok(itemDto);
         }
     }
 }

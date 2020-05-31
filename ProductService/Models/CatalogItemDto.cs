@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CatalogService.Data.Entities;
+using System;
 
 namespace CatalogService.Models
 {
@@ -6,12 +7,12 @@ namespace CatalogService.Models
     {
         public CatalogItemDto(){}
 
-        public CatalogItemDto(Guid id, string title, decimal price, string imageUrl)
+        public CatalogItemDto(CatalogItem itemEntity)
         {
-            Id = id;
-            Title = title;
-            Price = price;
-            ImageUrl = imageUrl;
+            Id = itemEntity.Id;
+            Title = itemEntity.Title;
+            Price = itemEntity.Price;
+            ImageUrl = itemEntity.ImageUrl;
         }
 
         public Guid Id { get; set; }

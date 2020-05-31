@@ -7,7 +7,7 @@ using Web.Models;
 
 namespace Web.Services
 {
-    public class OrderRepository : IOrderRepository
+    public class OrderRepository /*: IOrderRepository*/
     {
         private readonly InMemoryOrders _inMemoryOrders;
         private readonly ShoppingCart _shoppingCart;
@@ -18,27 +18,27 @@ namespace Web.Services
             _shoppingCart = shoppingCart;
         }
 
-        public void CreateOrder(Order order)
-        {
-            order.OrderPlaced = DateTime.Now;
+        //public void CreateOrder(Order order)
+        //{
+        //    order.OrderPlaced = DateTime.Now;
 
-            var shoppingCartItems = _shoppingCart.ShoppingCartItems;
-            order.OrderTotal = _shoppingCart.GetShoppingCartTotal();
+        //    var shoppingCartItems = _shoppingCart.ShoppingCartItems;
+        //    order.OrderTotal = _shoppingCart.GetShoppingCartTotal();
 
-            order.OrderDetails = new List<OrderDetail>();
+        //    order.OrderDetails = new List<OrderDetail>();
 
-            foreach (var shoppingCartItem in shoppingCartItems)
-            {
-                var orderDetail = new OrderDetail
-                {                    
-                    Product = shoppingCartItem.Product,                    
-                    Amount = shoppingCartItem.Amount,
-                };
+        //    foreach (var shoppingCartItem in shoppingCartItems)
+        //    {
+        //        var orderDetail = new OrderDetail
+        //        {                    
+        //            Product = shoppingCartItem.Product,                    
+        //            Amount = shoppingCartItem.Amount,
+        //        };
 
-                order.OrderDetails.Add(orderDetail);
-            }
+        //        order.OrderDetails.Add(orderDetail);
+        //    }
 
-            _inMemoryOrders.Orders.Add(order);
-        }
+        //    _inMemoryOrders.Orders.Add(order);
+        //}
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CatalogService.Models
+namespace Web.Models
 {
     public class CatalogItemDto
     {

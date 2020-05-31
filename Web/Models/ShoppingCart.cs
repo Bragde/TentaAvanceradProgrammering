@@ -1,10 +1,8 @@
-﻿using CatalogService.Models;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Web.Data;
 
 namespace Web.Models
@@ -35,76 +33,76 @@ namespace Web.Models
             return new ShoppingCart(context);
         }
 
-        public void AddToCart(CatalogItemDto product, int amount)
-        {
-            var shoppingCartItem =
-                    _inMemoryShoppingCartItems.ShoppingCartItems.SingleOrDefault(
-                        s => s.Product.Id == product.Id && s.ShoppingCartId == ShoppingCartId);
+        //public void AddToCart(CatalogItemDto product, int amount)
+        //{
+        //    var shoppingCartItem =
+        //            _inMemoryShoppingCartItems.ShoppingCartItems.SingleOrDefault(
+        //                s => s.Product.Id == product.Id && s.ShoppingCartId == ShoppingCartId);
 
-            if (shoppingCartItem == null)
-            {
-                shoppingCartItem = new ShoppingCartItem
-                {
-                    ShoppingCartId = ShoppingCartId,
-                    Product = product,
-                    Amount = 1
-                };
+        //    if (shoppingCartItem == null)
+        //    {
+        //        shoppingCartItem = new ShoppingCartItem
+        //        {
+        //            ShoppingCartId = ShoppingCartId,
+        //            Product = product,
+        //            Amount = 1
+        //        };
 
-                _inMemoryShoppingCartItems.ShoppingCartItems.Add(shoppingCartItem);
-            }
-            else
-            {
-                shoppingCartItem.Amount++;
-            }
-        }
+        //        _inMemoryShoppingCartItems.ShoppingCartItems.Add(shoppingCartItem);
+        //    }
+        //    else
+        //    {
+        //        shoppingCartItem.Amount++;
+        //    }
+        //}
 
-        public int RemoveFromCart(CatalogItemDto product)
-        {
-            var shoppingCartItem =
-                    _inMemoryShoppingCartItems.ShoppingCartItems.SingleOrDefault(
-                        s => s.Product.Id == product.Id && s.ShoppingCartId == ShoppingCartId);
+        //public int RemoveFromCart(CatalogItemDto product)
+        //{
+        //    var shoppingCartItem =
+        //            _inMemoryShoppingCartItems.ShoppingCartItems.SingleOrDefault(
+        //                s => s.Product.Id == product.Id && s.ShoppingCartId == ShoppingCartId);
 
-            var localAmount = 0;
+        //    var localAmount = 0;
 
-            if (shoppingCartItem != null)
-            {
-                if (shoppingCartItem.Amount > 1)
-                {
-                    shoppingCartItem.Amount--;
-                    localAmount = shoppingCartItem.Amount;
-                }
-                else
-                {
-                    _inMemoryShoppingCartItems.ShoppingCartItems.Remove(shoppingCartItem);
-                }
-            }
+        //    if (shoppingCartItem != null)
+        //    {
+        //        if (shoppingCartItem.Amount > 1)
+        //        {
+        //            shoppingCartItem.Amount--;
+        //            localAmount = shoppingCartItem.Amount;
+        //        }
+        //        else
+        //        {
+        //            _inMemoryShoppingCartItems.ShoppingCartItems.Remove(shoppingCartItem);
+        //        }
+        //    }
 
-            return localAmount;
-        }
+        //    return localAmount;
+        //}
 
-        public List<ShoppingCartItem> GetShoppingCartItems()
-        {
-            return ShoppingCartItems ??
-                   (ShoppingCartItems =
-                        _inMemoryShoppingCartItems.ShoppingCartItems.Where(c => c.ShoppingCartId == ShoppingCartId)
-                        .ToList());
-        }
+        //public List<ShoppingCartItem> GetShoppingCartItems()
+        //{
+        //    return ShoppingCartItems ??
+        //           (ShoppingCartItems =
+        //                _inMemoryShoppingCartItems.ShoppingCartItems.Where(c => c.ShoppingCartId == ShoppingCartId)
+        //                .ToList());
+        //}
 
-        public void ClearCart()
-        {
-            var cartItems = _inMemoryShoppingCartItems
-                .ShoppingCartItems
-                .Where(cart => cart.ShoppingCartId == ShoppingCartId);
+        //public void ClearCart()
+        //{
+        //    var cartItems = _inMemoryShoppingCartItems
+        //        .ShoppingCartItems
+        //        .Where(cart => cart.ShoppingCartId == ShoppingCartId);
 
-            _inMemoryShoppingCartItems.ShoppingCartItems
-                .RemoveAll(item => cartItems.Contains(item));                
-        }
+        //    _inMemoryShoppingCartItems.ShoppingCartItems
+        //        .RemoveAll(item => cartItems.Contains(item));                
+        //}
 
-        public decimal GetShoppingCartTotal()
-        {
-            var total = _inMemoryShoppingCartItems.ShoppingCartItems.Where(c => c.ShoppingCartId == ShoppingCartId)
-                .Select(c => c.Product.Price * c.Amount).Sum();
-            return total;
-        }
+        //public decimal GetShoppingCartTotal()
+        //{
+        //    var total = _inMemoryShoppingCartItems.ShoppingCartItems.Where(c => c.ShoppingCartId == ShoppingCartId)
+        //        .Select(c => c.Product.Price * c.Amount).Sum();
+        //    return total;
+        //}
     }
 }

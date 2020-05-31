@@ -17,11 +17,6 @@ namespace CatalogService.Data.Context
 
         public DbSet<CatalogItem> CatalogItems { get; set; }
 
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=AvcPgmCatalog;Trusted_Connection=True;");
-        //}
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

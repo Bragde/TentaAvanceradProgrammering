@@ -1,0 +1,24 @@
+﻿@model CatalogItemDto
+
+<div class="text-center">
+    <h1 class="display-4">Products</h1>
+    <div class="table-responsive-sm">
+        <table class="table">
+            <tbody>
+                <tr>
+                    <td class="p-0"><img style="max-width: 150px" src="@Model.ImageUrl" alt="Product image" /></td>
+                    <td class="text-left">@Model.Title</td>
+                    <td>@Model.Price€</td>
+                    <td>
+                        <a class="btn btn-sm btn-success"
+                            asp-controller="ShoppingCart"
+                            asp-action="AddToShoppingCart"
+                            asp-route-productId="@Model.Id">
+                            Add to Cart
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

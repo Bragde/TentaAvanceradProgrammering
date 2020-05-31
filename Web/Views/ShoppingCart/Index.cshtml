@@ -13,11 +13,11 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model.ShoppingCart.ShoppingCartItems)
+                @foreach (var item in Model.ShoppingCartItems)
                 {
                     <tr>
-                        <td class="p-0"><img style="max-width: 150px" src="@item.Product.imageUrl" alt="Product image" /></td>
-                        <td class="text-left">@item.Product.Name</td>
+                        <td class="p-0"><img style="max-width: 150px" src="@item.Product.ImageUrl" alt="Product image" /></td>
+                        <td class="text-left">@item.Product.Title</td>
                         <td>@item.Product.Price€</td>
                         <td class="text-center">@item.Amount</td>
                         <td>@((item.Amount * item.Product.Price))€</td>

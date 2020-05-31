@@ -38,8 +38,7 @@ namespace Web
 
             services.AddControllersWithViews();
             services.AddRazorPages();
-            services.AddScoped<IProductRepository, MockProductRepository>();
-            services.AddScoped<IOrderRepository, OrderRepository>();
+            //services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<InMemoryShoppingCartItems>(sp => InMemoryShoppingCartItems.GetInstance());
             services.AddScoped<InMemoryOrders>(sp => InMemoryOrders.GetInstance());
             services.AddScoped<ShoppingCart>(sp => ShoppingCart.GetCart(sp));
@@ -50,12 +49,14 @@ namespace Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
+            UserManager<ApplicationUser> userManager)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
+                ApplicationDbInitializer.SeedUser(userManager);
             }
             else
             {
