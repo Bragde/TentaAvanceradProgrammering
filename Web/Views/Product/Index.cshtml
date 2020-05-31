@@ -9,15 +9,15 @@
                 {
                     <tr>
                         <td class="p-0">
-                            <a asp-controller="Product" asp-action="GetById" asp-route-catalogItemId="@product.Id">
+                            @*<a asp-controller="Product" asp-action="GetById" asp-route-catalogItemId="@product.Id">*@
                                <img style="max-width: 150px" src="@product.ImageUrl" alt="Product image" />
-                            </a>
+                            @*</a>*@
                         </td>
                         
                         <td class="text-left">
-                            <a asp-controller="Product" asp-action="GetById" asp-route-catalogItemId="@product.Id">
+                            @*<a asp-controller="Product" asp-action="GetById" asp-route-catalogItemId="@product.Id">*@
                                 @product.Title
-                            </a>
+                            @*</a>*@
                         </td>
                         <td>@product.Price€</td>
                         <td>

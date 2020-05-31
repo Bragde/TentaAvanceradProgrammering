@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Web.Models;
 using Web.Services;
 using Web.ViewModels;
@@ -16,17 +17,20 @@ namespace Web.Controllers
 {
     public class ShoppingCartController : Controller
     {
-        private readonly ShoppingCart _shoppingCart;
         private readonly IHttpClientFactory _clientFactory;
+        private readonly IConfiguration _config;
+        private readonly string _shoppingCartServiceRoot;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public ShoppingCartController(ShoppingCart shoppingCart,
             IHttpClientFactory clientFactory,
+            IConfiguration config,
             UserManager<ApplicationUser> userManager)
         {
-            _shoppingCart = shoppingCart;
             _clientFactory = clientFactory;
+            _config = config;
             _userManager = userManager;
+            _shoppingCartServiceRoot = _config.GetValue(typeof(string), "ShoppingCartServiceRoot").ToString();
         }
 
         // SHOW SHOPPINGCART VIEW
@@ -38,7 +42,7 @@ namespace Web.Controllers
 
             // Get shoppingcart items by shoppingcart id
             var client = _clientFactory.CreateClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, $"http://localhost:51045/shoppingcartservice/shoppingcarts/{shoppingCartId}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_shoppingCartServiceRoot}GetShoppingCartItemsByShoppingCartId/{shoppingCartId}");
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "AvcPgm.UI");
 
@@ -47,19 +51,20 @@ namespace Web.Controllers
             if (response.IsSuccessStatusCode)
             {
                 using var responseStream = await response.Content.ReadAsStreamAsync();
-                var shoppingCartItems = await JsonSerializer.DeserializeAsync<IEnumerable<ShoppingCartItemDto>>(responseStream,
+                var shoppingCartItemsDto = await JsonSerializer.DeserializeAsync<IEnumerable<ShoppingCartItemDto>>(responseStream,
                     new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
 
                 // Create shoppingcart viewmodel
                 var vm = new ShoppingCartViewModel();
-                foreach (var item in shoppingCartItems)
+                foreach (var item in shoppingCartItemsDto)
                 {
-                    var shoppingCartItem = new ShoppingCartItem();
-                    shoppingCartItem.ShoppingCartItemId = item.ShoppingCartItemId;
+                    var shoppingCartItem = new ShoppingCartItem(item);
                     shoppingCartItem.Product = await GetCatalogItemById(item.CatalogItemId);
-                    shoppingCartItem.Amount = item.Amount;
-                    shoppingCartItem.ShoppingCartId = item.ShoppingCartId;
+                    vm.ShoppingCartItems.Add(shoppingCartItem);
                 };
+                vm.ShoppingCartTotal = vm.ShoppingCartItems
+                    .Select(x => x.Product.Price * x.Amount)
+                    .Sum();
 
                 return View(vm);
             }
@@ -70,7 +75,7 @@ namespace Web.Controllers
         public async Task<CatalogItemDto> GetCatalogItemById(Guid catalogItemId)
         {
             var client = _clientFactory.CreateClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, $"http://localhost:51044/catalogservice/catalogitems/{catalogItemId}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"http://localhost:51044/catalogservice/CatalogItem/GetById/{catalogItemId}");
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "AvcPgm.UI");
 
@@ -100,7 +105,8 @@ namespace Web.Controllers
             };
 
             var client = _clientFactory.CreateClient();
-            var request = new HttpRequestMessage(HttpMethod.Post, $"http://localhost:51045/shoppingcartservice/shoppingcarts");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{_shoppingCartServiceRoot}AddItemToShoppingCart");
+            //var request = new HttpRequestMessage(HttpMethod.Post, $"http://localhost:51045/ShoppingCartService/ShoppingCart/AddItemToShoppingCart");
 
             var itemJson = JsonSerializer.Serialize(item);
             request.Content = new StringContent(itemJson, Encoding.UTF8, "application/json");

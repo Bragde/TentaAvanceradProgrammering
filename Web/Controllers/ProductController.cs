@@ -22,7 +22,7 @@ namespace Web.Controllers
         public async Task<IActionResult> Index()
         {
             var client = _clientFactory.CreateClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:51044/catalogservice/catalogitems");
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:51044/catalogservice/CatalogItem/GetAll");
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "AvcPgm.UI");
 
@@ -45,7 +45,7 @@ namespace Web.Controllers
         public async Task<IActionResult> GetById(Guid catalogItemId)
         {
             var client = _clientFactory.CreateClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, $"http://localhost:51044/catalogservice/catalogitems/{catalogItemId}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"http://localhost:51044/catalogservice/CatalogItem/GetById/{catalogItemId}");
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "AvcPgm.UI");
 

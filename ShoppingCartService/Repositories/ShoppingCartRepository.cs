@@ -16,7 +16,7 @@ namespace ShoppingCartService.Repositories
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public List<ShoppingCartItem> GetShoppingCartByShoppingCartId(Guid ShoppingCartId)
+        public List<ShoppingCartItem> GetShoppingCartItemsByShoppingCartId(Guid ShoppingCartId)
         {
             if (ShoppingCartId == Guid.Empty)
                 throw new ArgumentNullException(nameof(ShoppingCartId));
@@ -28,13 +28,15 @@ namespace ShoppingCartService.Repositories
             return shoppingCartItems;
         }
 
-        public ShoppingCartItem GetItemByShoppingCartItemId(Guid shoppingCartItemId)
+        public ShoppingCartItem GetItemFromShoppingCart(ShoppingCartItem shoppingCartItem)
         {
-            if (shoppingCartItemId == Guid.Empty)
-                throw new ArgumentNullException(nameof(shoppingCartItemId));
+            if (shoppingCartItem == null)
+                throw new ArgumentNullException(nameof(shoppingCartItem));
 
             var item = _context.ShoppingCartItems
-                .FirstOrDefault(x => x.ShoppingCartItemId == shoppingCartItemId);
+                .FirstOrDefault(x => 
+                    x.CatalogItemId == shoppingCartItem.CatalogItemId
+                    && x.ShoppingCartId == shoppingCartItem.ShoppingCartId);
 
             return item;
         }
@@ -48,7 +50,13 @@ namespace ShoppingCartService.Repositories
                 shoppingCartItem.ShoppingCartId = Guid.NewGuid();
 
             _context.ShoppingCartItems.Add(shoppingCartItem);
-            _context.SaveChanges();
+        }
+
+
+
+        public async Task<bool> Save()
+        {
+            return (await _context.SaveChangesAsync()) > 0;
         }
     }
 }

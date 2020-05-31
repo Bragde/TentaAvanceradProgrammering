@@ -8,8 +8,9 @@ namespace ShoppingCartService.Repositories
 {
     public interface IShoppingCartRepository
     {
-        List<ShoppingCartItem> GetShoppingCartByShoppingCartId(Guid shoppingCartId);
-        ShoppingCartItem GetItemByShoppingCartItemId(Guid shopingCartItemId);
-        void AddItemToShoppingCart(ShoppingCartItem shoppingCartItem);        
+        List<ShoppingCartItem> GetShoppingCartItemsByShoppingCartId(Guid shoppingCartId);
+        ShoppingCartItem GetItemFromShoppingCart(ShoppingCartItem shoppingCartItem);
+        void AddItemToShoppingCart(ShoppingCartItem shoppingCartItem);
+        Task<bool> Save();
     }
 }

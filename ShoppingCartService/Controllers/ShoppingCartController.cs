@@ -10,7 +10,7 @@ using ShoppingCartService.Repositories;
 namespace ShoppingCartService.Controllers
 {
     [ApiController]
-    [Route("shoppingcartservice/shoppingcarts")]
+    [Route("ShoppingCartService/[controller]/[action]")]
     public class ShoppingCartController : ControllerBase
     {
         private readonly IShoppingCartRepository _shoppingCartRepository;
@@ -21,9 +21,9 @@ namespace ShoppingCartService.Controllers
         }
 
         [HttpGet("{shoppingCartId}")]
-        public ActionResult<IEnumerable<ShoppingCartItemDto>> GetShoppingCartByShoppingCartId(Guid shoppingCartId)
+        public ActionResult<IEnumerable<ShoppingCartItemDto>> GetShoppingCartItemsByShoppingCartId(Guid shoppingCartId)
         {
-            var items = _shoppingCartRepository.GetShoppingCartByShoppingCartId(shoppingCartId);
+            var items = _shoppingCartRepository.GetShoppingCartItemsByShoppingCartId(shoppingCartId);
 
             if (items == null)
                 return NotFound();
@@ -33,6 +33,24 @@ namespace ShoppingCartService.Controllers
             return Ok(itemsDto);
         }
 
+        [HttpPost]
+        public async Task<ActionResult<ShoppingCartItemDto>> AddItemToShoppingCart(ShoppingCartItemDto shoppingCartItemDto)
+        {
+            var shoppingCartItemEntity = new ShoppingCartItem(shoppingCartItemDto);
 
+            var itemInDb = _shoppingCartRepository.GetItemFromShoppingCart(shoppingCartItemEntity);
+            if (itemInDb == null)
+            {
+                shoppingCartItemEntity.Amount = 1;
+                _shoppingCartRepository.AddItemToShoppingCart(shoppingCartItemEntity);
+            }
+            else
+                itemInDb.Amount++;
+
+            if (!await _shoppingCartRepository.Save())
+                return BadRequest("Add item to shoppingcart failed.");
+
+            return Ok();
+        }
     }
 }
