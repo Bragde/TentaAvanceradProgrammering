@@ -14,12 +14,12 @@ namespace ShoppingCartService.Models
             ShoppingCartItemId = itemEntity.ShoppingCartItemId;
             CatalogItemId = itemEntity.CatalogItemId;
             Amount = itemEntity.Amount;
-            ShoppingCartId = itemEntity.ShoppingCartId;
+            UserId = itemEntity.UserId;
         }
 
         public Guid ShoppingCartItemId { get; set; }
         public Guid CatalogItemId { get; set; }
         public int Amount { get; set; }
-        public Guid ShoppingCartId { get; set; }
+        public string UserId { get; set; }
     }
 }

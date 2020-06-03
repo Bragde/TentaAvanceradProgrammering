@@ -16,13 +16,13 @@ namespace ShoppingCartService.Repositories
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public List<ShoppingCartItem> GetShoppingCartItemsByShoppingCartId(Guid ShoppingCartId)
+        public List<ShoppingCartItem> GetShoppingCartItemsByUserId(string userId)
         {
-            if (ShoppingCartId == Guid.Empty)
-                throw new ArgumentNullException(nameof(ShoppingCartId));
+            if (String.IsNullOrEmpty(userId))
+                throw new ArgumentNullException(nameof(userId));
 
             var shoppingCartItems = _context.ShoppingCartItems
-                .Where(x => x.ShoppingCartId == ShoppingCartId)
+                .Where(x => x.UserId == userId)
                 .ToList();
 
             return shoppingCartItems;
@@ -36,7 +36,7 @@ namespace ShoppingCartService.Repositories
             var item = _context.ShoppingCartItems
                 .FirstOrDefault(x => 
                     x.CatalogItemId == shoppingCartItem.CatalogItemId
-                    && x.ShoppingCartId == shoppingCartItem.ShoppingCartId);
+                    && x.UserId == shoppingCartItem.UserId);
 
             return item;
         }
@@ -46,17 +46,22 @@ namespace ShoppingCartService.Repositories
             if (shoppingCartItem == null)
                 throw new ArgumentNullException(nameof(shoppingCartItem));
 
-            if (shoppingCartItem.ShoppingCartId == null)
-                shoppingCartItem.ShoppingCartId = Guid.NewGuid();
-
             _context.ShoppingCartItems.Add(shoppingCartItem);
         }
-
-
 
         public async Task<bool> Save()
         {
             return (await _context.SaveChangesAsync()) > 0;
+        }
+
+        public void DeleteShoppingCart(string userId)
+        {
+            if (userId == null)
+                throw new ArgumentNullException(nameof(userId));
+
+            var itemsToBeRemoved = GetShoppingCartItemsByUserId(userId);
+
+            _context.RemoveRange(itemsToBeRemoved);
         }
     }
 }

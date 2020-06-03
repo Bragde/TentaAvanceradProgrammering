@@ -10,12 +10,12 @@ namespace ShoppingCartService.Models
         {
             CatalogItemId = itemDto.CatalogItemId;
             Amount = itemDto.Amount;
-            ShoppingCartId = itemDto.ShoppingCartId;
+            UserId = itemDto.UserId;
         }
 
         public Guid ShoppingCartItemId { get; set; }
         public Guid CatalogItemId { get; set; }
         public int Amount { get; set; }
-        public Guid ShoppingCartId { get; set; }
+        public string UserId { get; set; }
     }
 }

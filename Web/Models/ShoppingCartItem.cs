@@ -12,12 +12,12 @@ namespace Web.Models
         {
             ShoppingCartItemId = shoppingCartItemDto.ShoppingCartItemId;
             Amount = shoppingCartItemDto.Amount;
-            ShoppingCartId = shoppingCartItemDto.ShoppingCartId;
+            UserId = shoppingCartItemDto.UserId;
         }
 
         public Guid ShoppingCartItemId { get; set; }
         public CatalogItemDto Product { get; set; }
         public int Amount { get; set; }
-        public string ShoppingCartId { get; set; }
+        public string UserId { get; set; }
     }
 }

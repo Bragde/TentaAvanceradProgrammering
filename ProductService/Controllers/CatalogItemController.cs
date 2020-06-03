@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace CatalogService.Controllers
 {
     [ApiController]
-    [Route("catalogservice/[controller]/[action]")]
+    [Route("CatalogService/[controller]/[action]")]
     public class CatalogItemController : ControllerBase
     {
         private readonly ICatalogRepository _catalogRepository;

@@ -1,12 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 using Web.Models;
-using Web.Services;
 using Web.ViewModels;
 
 namespace Web.Controllers
@@ -14,64 +17,177 @@ namespace Web.Controllers
     [Authorize]
     public class OrderController : Controller
     {
-        private readonly ShoppingCart _shoppingCart;
-        private readonly IOrderRepository _orderRepository;
+        private readonly IHttpClientFactory _clientFactory;
+        private readonly IConfiguration _config;
+        private readonly string _shoppingCartServiceRoot;
+        private readonly string _orderServiceRoot;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public OrderController(ShoppingCart shoppingCart, 
-            IOrderRepository orderRepository,
+        public OrderController(
+            IConfiguration config,
+            IHttpClientFactory clientFactory,
             UserManager<ApplicationUser> userManager)
         {
-            _shoppingCart = shoppingCart;
-            _orderRepository = orderRepository;
+            _config = config;
+            _clientFactory = clientFactory;
             _userManager = userManager;
+            _shoppingCartServiceRoot = _config.GetValue(typeof(string), "ShoppingCartServiceRoot").ToString();
+            _orderServiceRoot = _config.GetValue(typeof(string), "OrderServiceRoot").ToString();
         }
 
         public async Task<IActionResult> Purchase()
         {
-            var orderViewModel = new OrderViewModel
+            // Display view to confirm shipping details
+            var user = await _userManager.GetUserAsync(User);
+
+            var vm = new OrderViewModel
             {
-                User = await _userManager.GetUserAsync(User)
+                User = user
             };
 
-            return View(orderViewModel);
+            return View(vm);
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> Purchase(Order order)
-        //{
-        //    var items = _shoppingCart.GetShoppingCartItems();
-        //    _shoppingCart.ShoppingCartItems = items;
+        [HttpPost]
+        public async Task<IActionResult> SaveOrder(ApplicationUser user)
+        {
+            if (ModelState.IsValid)
+            {
+                // Get user shoppingcart items and create an order
+                var shoppingCartItems = await GetShoppingCartItems(user);
 
-        //    if (_shoppingCart.ShoppingCartItems.Count == 0)
-        //    {
-        //        ModelState.AddModelError("", "Your cart is empty, add some products first");
-        //    }
+                var orderedProducts = await GetProductInformation(shoppingCartItems);
 
-        //    if (ModelState.IsValid)
-        //    {
-        //        //Add shoppingcart items to order
-        //        foreach (var item in items)
-        //        {
-        //            var orderDetail = new OrderDetail
-        //            {
-        //                Product = item.Product,
-        //                Amount = item.Amount
-        //            };
-        //            order.OrderDetails.Add(orderDetail);
-        //        }
+                var order = CreateOrder(orderedProducts, user);
 
-        //        var vm = new OrderViewModel
-        //        {
-        //            Order = order,
-        //            User = await _userManager.GetUserAsync(User)
-        //        };
+                // Save order to database
+                var client = _clientFactory.CreateClient();
+                var request = new HttpRequestMessage(HttpMethod.Post, $"{_orderServiceRoot}CreateOrder");
 
-        //        _orderRepository.CreateOrder(order);
-        //        _shoppingCart.ClearCart();
-        //        return View("PurchaseComplete", vm);
-        //    }
-        //    return View(new OrderViewModel());
-        //}
+                var orderJson = JsonSerializer.Serialize(order);
+                request.Content = new StringContent(orderJson, Encoding.UTF8, "application/json");
+                request.Headers.Add("User-Agent", "AvcPgm.UI");
+                var response = await client.SendAsync(request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    TempData["PostError"] = "Something went wrong when creating order, try again or contact support!";
+                }
+
+                // Remove users shoppingcart
+                await DeleteShoppingCart();
+
+                // Get id of object created in database
+                var location = response.Headers.Location.ToString();
+                var startIdx = location.LastIndexOf('/') + 1;
+                var endIdx = location.Length - startIdx;
+                var orderId = location.Substring(startIdx, endIdx);
+                order.OrderId = Guid.Parse(orderId);
+
+                // Display order confirmation view
+                var vm = new OrderViewModel
+                {
+                     Order = order,
+                     User = await _userManager.GetUserAsync(User)
+                };
+
+                return View("PurchaseComplete", vm);
+            }
+            return View(new OrderViewModel());
+        }
+
+        private async Task<IEnumerable<ShoppingCartItemDto>> GetShoppingCartItems(ApplicationUser user)
+        {
+            // Get shoppingcart items by user id
+            var client = _clientFactory.CreateClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_shoppingCartServiceRoot}GetShoppingCartItemsByUserId/{user.Id}");
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("User-Agent", "AvcPgm.UI");
+
+            var response = await client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var shoppingCartItemsDto = await JsonSerializer.DeserializeAsync<IEnumerable<ShoppingCartItemDto>>(responseStream,
+                    new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+
+                return shoppingCartItemsDto;
+            }
+
+            return new List<ShoppingCartItemDto>();
+        }
+
+        private async Task<IEnumerable<OrderProductDto>> GetProductInformation(IEnumerable<ShoppingCartItemDto> shoppingCartItems)
+        {
+            // Get catalog information for shoppingcart items
+            var orderedProducts = new List<OrderProductDto>();
+            foreach (var item in shoppingCartItems)
+            {
+                var orderedProduct = new OrderProductDto();
+                orderedProduct.Product = await GetCatalogItemById(item.CatalogItemId);
+                orderedProduct.Amount = item.Amount;
+
+                orderedProducts.Add(orderedProduct);
+            }
+
+            return orderedProducts;
+        }
+
+        private async Task<CatalogItemDto> GetCatalogItemById(Guid catalogItemId)
+        {
+
+
+
+            var client = _clientFactory.CreateClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, $"http://localhost:51044/catalogservice/CatalogItem/GetById/{catalogItemId}");
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("User-Agent", "AvcPgm.UI");
+
+            var response = await client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var catalogItem = await JsonSerializer.DeserializeAsync<CatalogItemDto>(responseStream,
+                    new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+
+                return catalogItem;
+            }
+
+            return new CatalogItemDto();
+        }
+
+        private OrderDto CreateOrder(IEnumerable<OrderProductDto> orderedProducts, ApplicationUser user)
+        {
+            // Create new order
+            var order = new OrderDto
+            {
+                UserId = user.Id,
+                OrderPlaced = DateTime.Now,
+                OrderedProducts = orderedProducts,
+                OrderTotal = orderedProducts.Select(x => x.Product.Price * x.Amount).Sum()
+            };
+
+            return order;
+        }
+
+        private async Task<IActionResult>DeleteShoppingCart()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            // Delete user shoppingcart items
+            var client = _clientFactory.CreateClient();
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"{_shoppingCartServiceRoot}DeleteShoppingCart/{user.Id}");
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("User-Agent", "Gamenet.UI");
+
+            var response = await client.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+                return BadRequest("Delete shoppingcart items failed.");
+
+            return Ok();
+        }
     }
 }
