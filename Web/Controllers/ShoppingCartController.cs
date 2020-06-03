@@ -124,11 +124,5 @@ namespace Web.Controllers
 
             return new List<ShoppingCartItemDto>();
         }
-
-        internal int CalculateShoppingCartItemAmount(List<ShoppingCartItemDto> shoppingCartItems)
-        {
-            var amount = shoppingCartItems.Select(x => x.Amount).Sum();
-            return amount;
-        }
     }
 }
