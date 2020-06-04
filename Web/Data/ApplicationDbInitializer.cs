@@ -15,23 +15,13 @@ namespace Web.Data
             {
                 var user = new ApplicationUser
                 {
+                    Id = "d28888e9-2ba9-473a-a40f-e38cb54f9b35",
                     UserName = "Admin",
                     Email = "admin@gamenet.com",
                     EmailConfirmed = true,
                 };
 
                 var result = userManager.CreateAsync(user, "Admin123!").Result;
-            }
-            if (userManager.FindByEmailAsync("daniel@gamenet.com").Result == null)
-            {
-                ApplicationUser user = new ApplicationUser()
-                {
-                    UserName = "Daniel",
-                    Email = "daniel@gamenet.com",
-                    EmailConfirmed = true
-                };
-
-                IdentityResult result = userManager.CreateAsync(user, "Daniel123!").Result;
             }
         }
     }

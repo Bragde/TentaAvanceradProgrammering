@@ -21,25 +21,37 @@ namespace OrderService.Controllers
             _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
         }
 
-        [HttpGet("{orderId}", Name = "GetOrder")]
-        public IActionResult GetOrder(Guid OrderId)
-        {
-            throw new NotImplementedException();
-        }
-
         [HttpPost]
         public async Task<ActionResult> CreateOrder(OrderDto order)
         {
+            if (order == null)
+                return BadRequest("Providet object has null value.");
             var orderEntity = new Order(order);
-            var orderProductsEntities = order.OrderedProducts.Select(x => new OrderProduct(x)).ToList();
-            _orderRepository.CreateOrder(orderEntity, orderProductsEntities);
+
+            try
+            {                
+                var orderProductsEntities = order.OrderedProducts.Select(x => new OrderProduct(x)).ToList();
+                _orderRepository.CreateOrder(orderEntity, orderProductsEntities);
+            }
+            catch (Exception)
+            {
+                return BadRequest("Provided object is not in correct format.");
+            }
             
             if (!await _orderRepository.Save())
-                return BadRequest("Add item to shoppingcart failed.");
+                return BadRequest("Save item to shoppingcart failed.");
 
             return CreatedAtRoute("GetOrder",
                 new { orderId = orderEntity.OrderId },
                 new OrderDto(orderEntity));
+        }
+
+        [HttpGet("{orderId}", Name = "GetOrder")]
+        /* Get order is not implemented. Method exists only so 
+         * CreatedAtRoute from CreateOrder will work*/
+        public async Task<IActionResult> GetOrder(Guid orderId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
