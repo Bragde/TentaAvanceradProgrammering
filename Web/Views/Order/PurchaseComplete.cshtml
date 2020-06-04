@@ -33,10 +33,10 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model.Order.OrderDetails)
+            @foreach (var item in Model.Order.OrderedProducts)
             {
                 <tr>
-                    <td class="text-left">@item.Product.Name</td>
+                    <td class="text-left">@item.Product.Title</td>
                     <td>@item.Product.Price€</td>
                     <td class="text-center">@item.Amount</td>
                     <td>@((item.Amount * item.Product.Price))€</td>

@@ -8,7 +8,12 @@ namespace Web.ViewModels
 {
     public class ShoppingCartViewModel
     {
-        public ShoppingCart ShoppingCart { get; set; }
+        public ShoppingCartViewModel()
+        {
+            ShoppingCartItems = new List<ShoppingCartItem>();
+        }
+
+        public List<ShoppingCartItem> ShoppingCartItems { get; set; }
         public decimal ShoppingCartTotal { get; set; }
     }
 }

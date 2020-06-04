@@ -1,36 +1,66 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Web.Data;
 using Web.Models;
-using Web.Services;
 using Web.ViewModels;
 
 namespace Web.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly IProductRepository _productRepository;
+        private readonly IHttpClientFactory _clientFactory;
 
-        public ProductController(IProductRepository productRepository)
+        public ProductController(IHttpClientFactory clientFactory)
         {
-            _productRepository = productRepository;
+            _clientFactory = clientFactory;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            IEnumerable<Product> products;
+            var client = _clientFactory.CreateClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:51044/catalogservice/CatalogItem/GetAll");
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("User-Agent", "AvcPgm.UI");
 
-            products = _productRepository.AllProducts.OrderBy(p => p.Name);
+            var response = await client.SendAsync(request);
 
-            return View(new ProductViewModel
+            if (response.IsSuccessStatusCode)
             {
-                Products = products
-            });
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var catalogItems = await JsonSerializer.DeserializeAsync<IEnumerable<CatalogItemDto>>(responseStream,
+                    new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+                
+                var vm = new ProductViewModel() { Products = catalogItems };
+
+                return View(vm);
+            }
+
+            return View(new ProductViewModel());
+        }
+
+        public async Task<IActionResult> GetById(Guid catalogItemId)
+        {
+            var client = _clientFactory.CreateClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, $"http://localhost:51044/catalogservice/CatalogItem/GetById/{catalogItemId}");
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("User-Agent", "AvcPgm.UI");
+
+            var response = await client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var catalogItem = await JsonSerializer.DeserializeAsync<CatalogItemDto>(responseStream,
+                    new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+
+                return View(catalogItem);
+            }
+
+            return RedirectToAction("Index");
         }
 
         public IActionResult Privacy()

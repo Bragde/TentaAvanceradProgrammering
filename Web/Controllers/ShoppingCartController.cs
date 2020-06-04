@@ -1,59 +1,128 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Web.Models;
-using Web.Services;
 using Web.ViewModels;
 
 namespace Web.Controllers
 {
     public class ShoppingCartController : Controller
     {
-        private readonly IProductRepository _productRepository;
-        private readonly ShoppingCart _shoppingCart;
+        private readonly IHttpClientFactory _clientFactory;
+        private readonly IConfiguration _config;
+        private readonly string _shoppingCartServiceRoot;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ShoppingCartController(IProductRepository productRepository, ShoppingCart shoppingCart)
+        public ShoppingCartController(
+            IHttpClientFactory clientFactory,
+            IConfiguration config,
+            UserManager<ApplicationUser> userManager)
         {
-            _productRepository = productRepository;
-            _shoppingCart = shoppingCart;
+            _clientFactory = clientFactory;
+            _config = config;
+            _userManager = userManager;
+            _shoppingCartServiceRoot = _config.GetValue(typeof(string), "ShoppingCartServiceRoot").ToString();
         }
 
-        public IActionResult Index()
+        public async Task<CatalogItemDto> GetCatalogItemById(Guid catalogItemId)
         {
-            var items = _shoppingCart.GetShoppingCartItems();
-            _shoppingCart.ShoppingCartItems = items;
+            var client = _clientFactory.CreateClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, $"http://localhost:51044/catalogservice/CatalogItem/GetById/{catalogItemId}");
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("User-Agent", "AvcPgm.UI");
 
-            var shoppingCartViewModel = new ShoppingCartViewModel
+            var response = await client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
             {
-                ShoppingCart = _shoppingCart,
-                ShoppingCartTotal = _shoppingCart.GetShoppingCartTotal()
-            };
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var catalogItem = await JsonSerializer.DeserializeAsync<CatalogItemDto>(responseStream,
+                    new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
 
-            return View(shoppingCartViewModel);
-        }
-
-        public RedirectToActionResult AddToShoppingCart(int productId)
-        {
-            var selectedProduct = _productRepository.AllProducts.FirstOrDefault(p => p.Id == productId);
-
-            if (selectedProduct != null)
-            {
-                _shoppingCart.AddToCart(selectedProduct, 1);
+                return catalogItem;
             }
 
-            return RedirectToAction("Index");
+            return new CatalogItemDto();
         }
 
-        public RedirectToActionResult RemoveFromShoppingCart(int productId)
+        [Authorize]
+        public async Task<IActionResult> AddToShoppingCart(Guid catalogItemId)
         {
-            var selectedProduct = _productRepository.AllProducts.FirstOrDefault(p => p.Id == productId);
+            var user = await _userManager.GetUserAsync(User);
 
-            if (selectedProduct != null)
-                _shoppingCart.RemoveFromCart(selectedProduct);
+            // Create a new shoppingcart item dto
+            var item = new ShoppingCartItemDto
+            {
+                CatalogItemId = catalogItemId,
+                UserId = user.Id
+            };
 
-            return RedirectToAction("Index");
+            var client = _clientFactory.CreateClient();
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{_shoppingCartServiceRoot}AddItemToShoppingCart");
+
+            var itemJson = JsonSerializer.Serialize(item);
+            request.Content = new StringContent(itemJson, Encoding.UTF8, "application/json");
+            request.Headers.Add("User-Agent", "AvcPgm.UI");
+            var response = await client.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["PostError"] = "Something went wrong when adding to shoppingcart, try again or contact support!";
+            }
+
+            return RedirectToAction("DisplayShoppingCart");
+        }
+
+        public async Task<IActionResult> DisplayShoppingCart()
+        {
+            var shoppingCartItemsDto = await GetShoppingCartItems();
+            if (shoppingCartItemsDto == null)
+                return NotFound("Shoppingcart not found");
+
+            // Create shoppingcart viewmodel
+            var vm = new ShoppingCartViewModel();
+            foreach (var item in shoppingCartItemsDto)
+            {
+                var shoppingCartItem = new ShoppingCartItem(item);
+                shoppingCartItem.Product = await GetCatalogItemById(item.CatalogItemId);
+                vm.ShoppingCartItems.Add(shoppingCartItem);
+            };
+            vm.ShoppingCartTotal = vm.ShoppingCartItems
+                .Select(x => x.Product.Price * x.Amount)
+                .Sum();
+
+            return View(vm);
+        }
+
+        internal async Task<IEnumerable<ShoppingCartItemDto>> GetShoppingCartItems()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            var client = _clientFactory.CreateClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_shoppingCartServiceRoot}GetShoppingCartItemsByUserId/{user.Id}");
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("User-Agent", "AvcPgm.UI");
+
+            var response = await client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var shoppingCartItemsDto = await JsonSerializer.DeserializeAsync<IEnumerable<ShoppingCartItemDto>>(responseStream,
+                    new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+
+                return shoppingCartItemsDto;
+            }
+
+            return new List<ShoppingCartItemDto>();
         }
     }
 }

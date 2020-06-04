@@ -8,14 +8,23 @@
                 @foreach (var product in Model.Products)
                 {
                     <tr>
-                        <td class="p-0"><img style="max-width: 150px" src="@product.imageUrl" alt="Product image" /></td>
-                        <td class="text-left">@product.Name</td>
+                        <td class="p-0">
+                            @*<a asp-controller="Product" asp-action="GetById" asp-route-catalogItemId="@product.Id">*@
+                               <img style="max-width: 150px" src="@product.ImageUrl" alt="Product image" />
+                            @*</a>*@
+                        </td>
+                        
+                        <td class="text-left">
+                            @*<a asp-controller="Product" asp-action="GetById" asp-route-catalogItemId="@product.Id">*@
+                                @product.Title
+                            @*</a>*@
+                        </td>
                         <td>@product.Price€</td>
                         <td>
                             <a class="btn btn-sm btn-success"
                                asp-controller="ShoppingCart"
                                asp-action="AddToShoppingCart"
-                               asp-route-productId="@product.Id">
+                               asp-route-catalogItemId="@product.Id">
                                 Add to Cart
                             </a>
                         </td>

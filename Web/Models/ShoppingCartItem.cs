@@ -1,15 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Web.Models
 {
     public class ShoppingCartItem
     {
-        public int ShoppingCartItemId { get; set; }
-        public Product Product { get; set; }
+        public ShoppingCartItem()
+        {
+
+        }
+        public ShoppingCartItem(ShoppingCartItemDto shoppingCartItemDto)
+        {
+            ShoppingCartItemId = shoppingCartItemDto.ShoppingCartItemId;
+            Amount = shoppingCartItemDto.Amount;
+            UserId = shoppingCartItemDto.UserId;
+        }
+
+        public Guid ShoppingCartItemId { get; set; }
+        public CatalogItemDto Product { get; set; }
         public int Amount { get; set; }
-        public string ShoppingCartId { get; set; }
+        public string UserId { get; set; }
     }
 }
