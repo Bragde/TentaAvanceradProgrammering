@@ -45,12 +45,13 @@ namespace ShoppingCartService.Controllers
             // If item already exists in users shoppingcart increase amount with one, else add one new item.
             var itemInDb = _shoppingCartRepository.GetItemFromShoppingCart(shoppingCartItemEntity);
             if (itemInDb == null)
-                shoppingCartItemEntity.Amount = 1;                
+            {
+                shoppingCartItemEntity.Amount = 1;
+                _shoppingCartRepository.AddItemToShoppingCart(shoppingCartItemEntity);
+            }
             else
                 itemInDb.Amount++;
-
-            _shoppingCartRepository.AddItemToShoppingCart(shoppingCartItemEntity);
-
+           
             if (!await _shoppingCartRepository.Save())
                 return BadRequest("Save item to shoppingcart failed.");
 
