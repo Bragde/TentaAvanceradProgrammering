@@ -1,5 +1,4 @@
 using CatalogService.Data.Context;
-using CatalogService.Data.Entities;
 using CatalogService.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System;

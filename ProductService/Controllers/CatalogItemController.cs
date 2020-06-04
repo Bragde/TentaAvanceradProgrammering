@@ -40,7 +40,7 @@ namespace CatalogService.Controllers
             var item =  _catalogRepository.GetById(catalogItemId);
 
             if (item == null)
-                return NotFound();
+                return NotFound(value: "Catalog item not found.");
 
             var itemDto = new CatalogItemDto(item);
 
