@@ -1,11 +1,11 @@
-﻿@model ShoppingCartViewModel
+﻿@model ShoppingCartSummaryViewModel
 
-@*@if (Model.ShoppingCart.ShoppingCartItems.Count > 0)
+@if (Model.ItemAmount > 0)
 {
-    <a class="nav-link text-dark" asp-controller="ShoppingCart" asp-action="Index">
+    <a class="nav-link text-dark" asp-controller="ShoppingCart" asp-action="DisplayShoppingCart">
         <i class="fas fa-shopping-cart"></i>
         <span id="cart-status">
-            @Model.ShoppingCart.ShoppingCartItems.Count
+            @Model.ItemAmount
         </span>
     </a>
-}*@
+}

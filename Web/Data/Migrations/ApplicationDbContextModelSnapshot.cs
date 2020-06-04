@@ -214,9 +214,6 @@ namespace Web.Data.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ShoppingCartId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("State")
                         .HasColumnType("nvarchar(max)");
 

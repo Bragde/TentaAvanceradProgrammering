@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -17,6 +18,5 @@ namespace Web.Models
         public string City { get; set; }
         public string State { get; set; }
         public string Country { get; set; }
-        public string ShoppingCartId { get; set; }
     }
 }

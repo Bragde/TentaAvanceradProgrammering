@@ -1,16 +1,15 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Web.Models;
-using Web.Services;
 using Web.ViewModels;
 
 namespace Web.Controllers
@@ -31,45 +30,6 @@ namespace Web.Controllers
             _config = config;
             _userManager = userManager;
             _shoppingCartServiceRoot = _config.GetValue(typeof(string), "ShoppingCartServiceRoot").ToString();
-        }
-
-        // SHOW SHOPPINGCART VIEW
-        public async Task<IActionResult> Index()
-        {
-            // Get user shoppingcart id
-            var user = await _userManager.GetUserAsync(User);
-            var shoppingCartId = user.ShoppingCartId;
-
-            // Get shoppingcart items by shoppingcart id
-            var client = _clientFactory.CreateClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, $"{_shoppingCartServiceRoot}GetShoppingCartItemsByShoppingCartId/{shoppingCartId}");
-            request.Headers.Add("Accept", "application/json");
-            request.Headers.Add("User-Agent", "AvcPgm.UI");
-
-            var response = await client.SendAsync(request);
-
-            if (response.IsSuccessStatusCode)
-            {
-                using var responseStream = await response.Content.ReadAsStreamAsync();
-                var shoppingCartItemsDto = await JsonSerializer.DeserializeAsync<IEnumerable<ShoppingCartItemDto>>(responseStream,
-                    new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-
-                // Create shoppingcart viewmodel
-                var vm = new ShoppingCartViewModel();
-                foreach (var item in shoppingCartItemsDto)
-                {
-                    var shoppingCartItem = new ShoppingCartItem(item);
-                    shoppingCartItem.Product = await GetCatalogItemById(item.CatalogItemId);
-                    vm.ShoppingCartItems.Add(shoppingCartItem);
-                };
-                vm.ShoppingCartTotal = vm.ShoppingCartItems
-                    .Select(x => x.Product.Price * x.Amount)
-                    .Sum();
-
-                return View(vm);
-            }
-
-            return NotFound("Shoppingcart not found");
         }
 
         public async Task<CatalogItemDto> GetCatalogItemById(Guid catalogItemId)
@@ -98,15 +58,15 @@ namespace Web.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
 
+            // Create a new shoppingcart item dto
             var item = new ShoppingCartItemDto
             {
                 CatalogItemId = catalogItemId,
-                ShoppingCartId = user.ShoppingCartId
+                UserId = user.Id
             };
 
             var client = _clientFactory.CreateClient();
             var request = new HttpRequestMessage(HttpMethod.Post, $"{_shoppingCartServiceRoot}AddItemToShoppingCart");
-            //var request = new HttpRequestMessage(HttpMethod.Post, $"http://localhost:51045/ShoppingCartService/ShoppingCart/AddItemToShoppingCart");
 
             var itemJson = JsonSerializer.Serialize(item);
             request.Content = new StringContent(itemJson, Encoding.UTF8, "application/json");
@@ -115,20 +75,54 @@ namespace Web.Controllers
 
             if (!response.IsSuccessStatusCode)
             {
-                TempData["PostError"] = "Something went wrong, try again or contact support!";
+                TempData["PostError"] = "Something went wrong when adding to shoppingcart, try again or contact support!";
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("DisplayShoppingCart");
         }
 
-        //public RedirectToActionResult RemoveFromShoppingCart(int productId)
-        //{
-        //    var selectedProduct = _productRepository.AllProducts.FirstOrDefault(p => p.Id == productId);
+        public async Task<IActionResult> DisplayShoppingCart()
+        {
+            var shoppingCartItemsDto = await GetShoppingCartItems();
+            if (shoppingCartItemsDto == null)
+                return NotFound("Shoppingcart not found");
 
-        //    if (selectedProduct != null)
-        //        _shoppingCart.RemoveFromCart(selectedProduct);
+            // Create shoppingcart viewmodel
+            var vm = new ShoppingCartViewModel();
+            foreach (var item in shoppingCartItemsDto)
+            {
+                var shoppingCartItem = new ShoppingCartItem(item);
+                shoppingCartItem.Product = await GetCatalogItemById(item.CatalogItemId);
+                vm.ShoppingCartItems.Add(shoppingCartItem);
+            };
+            vm.ShoppingCartTotal = vm.ShoppingCartItems
+                .Select(x => x.Product.Price * x.Amount)
+                .Sum();
 
-        //    return RedirectToAction("Index");
-        //}
+            return View(vm);
+        }
+
+        internal async Task<IEnumerable<ShoppingCartItemDto>> GetShoppingCartItems()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            var client = _clientFactory.CreateClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_shoppingCartServiceRoot}GetShoppingCartItemsByUserId/{user.Id}");
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("User-Agent", "AvcPgm.UI");
+
+            var response = await client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                var shoppingCartItemsDto = await JsonSerializer.DeserializeAsync<IEnumerable<ShoppingCartItemDto>>(responseStream,
+                    new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+
+                return shoppingCartItemsDto;
+            }
+
+            return new List<ShoppingCartItemDto>();
+        }
     }
 }

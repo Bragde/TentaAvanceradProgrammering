@@ -31,8 +31,8 @@ namespace ShoppingCartService.Migrations
                     b.Property<Guid>("CatalogItemId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ShoppingCartId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ShoppingCartItemId");
 
@@ -44,14 +44,14 @@ namespace ShoppingCartService.Migrations
                             ShoppingCartItemId = new Guid("90d6da79-e0e2-4ba8-bf61-2d94d90df811"),
                             Amount = 1,
                             CatalogItemId = new Guid("90d6da79-e0e2-4ba8-bf61-2d94d90df801"),
-                            ShoppingCartId = new Guid("90d6da79-e0e2-4ba8-bf61-2d94d90df810")
+                            UserId = "d28888e9-2ba9-473a-a40f-e38cb54f9b35"
                         },
                         new
                         {
                             ShoppingCartItemId = new Guid("90d6da79-e0e2-4ba8-bf61-2d94d90df812"),
                             Amount = 1,
                             CatalogItemId = new Guid("90d6da79-e0e2-4ba8-bf61-2d94d90df802"),
-                            ShoppingCartId = new Guid("90d6da79-e0e2-4ba8-bf61-2d94d90df810")
+                            UserId = "d28888e9-2ba9-473a-a40f-e38cb54f9b35"
                         });
                 });
 #pragma warning restore 612, 618

@@ -21,8 +21,8 @@ namespace ShoppingCartService.Data.Context
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<ShoppingCartItem>().HasData(
-                new ShoppingCartItem { ShoppingCartId = new Guid("90d6da79-e0e2-4ba8-bf61-2d94d90df810"), ShoppingCartItemId = new Guid("90d6da79-e0e2-4ba8-bf61-2d94d90df811"), CatalogItemId = new Guid("90d6da79-e0e2-4ba8-bf61-2d94d90df801"), Amount = 1 },
-                new ShoppingCartItem { ShoppingCartId = new Guid("90d6da79-e0e2-4ba8-bf61-2d94d90df810"), ShoppingCartItemId = new Guid("90d6da79-e0e2-4ba8-bf61-2d94d90df812"), CatalogItemId = new Guid("90d6da79-e0e2-4ba8-bf61-2d94d90df802"), Amount = 1 }           
+                new ShoppingCartItem { UserId = "d28888e9-2ba9-473a-a40f-e38cb54f9b35", ShoppingCartItemId = new Guid("90d6da79-e0e2-4ba8-bf61-2d94d90df811"), CatalogItemId = new Guid("90d6da79-e0e2-4ba8-bf61-2d94d90df801"), Amount = 1 },
+                new ShoppingCartItem { UserId = "d28888e9-2ba9-473a-a40f-e38cb54f9b35", ShoppingCartItemId = new Guid("90d6da79-e0e2-4ba8-bf61-2d94d90df812"), CatalogItemId = new Guid("90d6da79-e0e2-4ba8-bf61-2d94d90df802"), Amount = 1 }
             );
         }
     }

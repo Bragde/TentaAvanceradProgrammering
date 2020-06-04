@@ -20,13 +20,13 @@ namespace ShoppingCartService.Controllers
             _shoppingCartRepository = shoppingCartRepository ?? throw new ArgumentNullException(nameof(shoppingCartRepository));
         }
 
-        [HttpGet("{shoppingCartId}")]
-        public ActionResult<IEnumerable<ShoppingCartItemDto>> GetShoppingCartItemsByShoppingCartId(Guid shoppingCartId)
+        [HttpGet("{userId}")]
+        public ActionResult<IEnumerable<ShoppingCartItemDto>> GetShoppingCartItemsByUserId(string userId)
         {
-            var items = _shoppingCartRepository.GetShoppingCartItemsByShoppingCartId(shoppingCartId);
+            var items = _shoppingCartRepository.GetShoppingCartItemsByUserId(userId);
 
-            if (items == null)
-                return NotFound();
+            if (items.Count == 0)
+                return NotFound("No shoppingcart items were found.");
 
             var itemsDto = items.Select(x => new ShoppingCartItemDto(x)).ToList();
 
@@ -36,19 +36,34 @@ namespace ShoppingCartService.Controllers
         [HttpPost]
         public async Task<ActionResult<ShoppingCartItemDto>> AddItemToShoppingCart(ShoppingCartItemDto shoppingCartItemDto)
         {
+            if (shoppingCartItemDto.CatalogItemId == null
+                || shoppingCartItemDto.UserId == null)
+                return BadRequest("Provided object does not contain necessary information.");
+
             var shoppingCartItemEntity = new ShoppingCartItem(shoppingCartItemDto);
 
+            // If item already exists in users shoppingcart increase amount with one, else add one new item.
             var itemInDb = _shoppingCartRepository.GetItemFromShoppingCart(shoppingCartItemEntity);
             if (itemInDb == null)
-            {
-                shoppingCartItemEntity.Amount = 1;
-                _shoppingCartRepository.AddItemToShoppingCart(shoppingCartItemEntity);
-            }
+                shoppingCartItemEntity.Amount = 1;                
             else
                 itemInDb.Amount++;
 
+            _shoppingCartRepository.AddItemToShoppingCart(shoppingCartItemEntity);
+
             if (!await _shoppingCartRepository.Save())
-                return BadRequest("Add item to shoppingcart failed.");
+                return BadRequest("Save item to shoppingcart failed.");
+
+            return Ok();
+        }
+
+        [HttpDelete("{userId}")]
+        public async Task<ActionResult> DeleteShoppingCart(string userId)
+        {
+            _shoppingCartRepository.DeleteShoppingCart(userId);
+
+            if (!await _shoppingCartRepository.Save())
+                return BadRequest("Delete shoppingcart failed.");
 
             return Ok();
         }

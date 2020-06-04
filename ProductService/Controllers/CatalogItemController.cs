@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace CatalogService.Controllers
 {
     [ApiController]
-    [Route("catalogservice/[controller]/[action]")]
+    [Route("CatalogService/[controller]/[action]")]
     public class CatalogItemController : ControllerBase
     {
         private readonly ICatalogRepository _catalogRepository;
@@ -40,7 +40,7 @@ namespace CatalogService.Controllers
             var item =  _catalogRepository.GetById(catalogItemId);
 
             if (item == null)
-                return NotFound();
+                return NotFound(value: "Catalog item not found.");
 
             var itemDto = new CatalogItemDto(item);
 

@@ -15,13 +15,13 @@ namespace Web.Data
             {
                 var user = new ApplicationUser
                 {
-                    UserName = "admin",
+                    Id = "d28888e9-2ba9-473a-a40f-e38cb54f9b35",
+                    UserName = "Admin",
                     Email = "admin@gamenet.com",
                     EmailConfirmed = true,
-                    ShoppingCartId = "90d6da79-e0e2-4ba8-bf61-2d94d90df810"
                 };
 
-                var result = userManager.CreateAsync(user, "Password1!").Result;
+                var result = userManager.CreateAsync(user, "Admin123!").Result;
             }
         }
     }

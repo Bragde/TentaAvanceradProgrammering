@@ -10,6 +10,6 @@ namespace Web.Models
         public Guid ShoppingCartItemId { get; set; }
         public Guid CatalogItemId { get; set; }
         public int Amount { get; set; }
-        public string ShoppingCartId { get; set; }
+        public string UserId { get; set; }
     }
 }
