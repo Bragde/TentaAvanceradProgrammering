@@ -31,7 +31,7 @@ namespace Web.Controllers
             _config = config;
             _userManager = userManager;
             _shoppingCartServiceRoot = _config.GetValue(typeof(string), "ShoppingCartServiceRoot").ToString();
-            _catalogServiceRoot = _config.GetValue(typeof(string), "CatalogServiveRoot").ToString();                      
+            _catalogServiceRoot = _config.GetValue<string>("CatalogServiceRoot").ToString();                      
         }
 
         public async Task<CatalogItemDto> GetCatalogItemById(Guid catalogItemId)
@@ -40,7 +40,7 @@ namespace Web.Controllers
             var request = new HttpRequestMessage(HttpMethod.Get, $"{_catalogServiceRoot}GetById/{catalogItemId}");
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "AvcPgm.UI");
-            var apiKey = _config.GetValue<string>("ApiKeys:MySecretApiKey");
+            var apiKey = _config.GetValue<string>("ApiKeys:CatalogApiKey");
             request.Headers.Add("ApiKey", apiKey);
 
             var response = await client.SendAsync(request);

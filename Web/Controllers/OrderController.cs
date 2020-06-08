@@ -34,7 +34,7 @@ namespace Web.Controllers
             _userManager = userManager;
             _shoppingCartServiceRoot = _config.GetValue(typeof(string), "ShoppingCartServiceRoot").ToString();
             _orderServiceRoot = _config.GetValue(typeof(string), "OrderServiceRoot").ToString();
-            _catalogServiceRoot = _config.GetValue(typeof(string), "CatalogServiveRoot").ToString();
+            _catalogServiceRoot = _config.GetValue(typeof(string), "CatalogServiceRoot").ToString();
         }
 
         public async Task<IActionResult> Purchase()

@@ -21,7 +21,7 @@ namespace Web.Controllers
         {
             _clientFactory = clientFactory;
             _config = config;
-            _catalogServiceRoot = _config.GetValue(typeof(string), "CatalogServiceRoot").ToString();
+            _catalogServiceRoot = _config.GetValue<string>("CatalogServiceRoot").ToString();
         }
 
         public async Task<IActionResult> Index()
