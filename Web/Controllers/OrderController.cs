@@ -21,6 +21,7 @@ namespace Web.Controllers
         private readonly IConfiguration _config;
         private readonly string _shoppingCartServiceRoot;
         private readonly string _orderServiceRoot;
+        private readonly string _catalogServiceRoot;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public OrderController(
@@ -33,6 +34,7 @@ namespace Web.Controllers
             _userManager = userManager;
             _shoppingCartServiceRoot = _config.GetValue(typeof(string), "ShoppingCartServiceRoot").ToString();
             _orderServiceRoot = _config.GetValue(typeof(string), "OrderServiceRoot").ToString();
+            _catalogServiceRoot = _config.GetValue(typeof(string), "CatalogServiveRoot").ToString();
         }
 
         public async Task<IActionResult> Purchase()
@@ -67,6 +69,8 @@ namespace Web.Controllers
                 var orderJson = JsonSerializer.Serialize(order);
                 request.Content = new StringContent(orderJson, Encoding.UTF8, "application/json");
                 request.Headers.Add("User-Agent", "AvcPgm.UI");
+                var apiKey = _config.GetValue<string>("ApiKeys:OrderApiKey");
+                request.Headers.Add("ApiKey", apiKey);
                 var response = await client.SendAsync(request);
 
                 if (!response.IsSuccessStatusCode)
@@ -103,6 +107,8 @@ namespace Web.Controllers
             var request = new HttpRequestMessage(HttpMethod.Get, $"{_shoppingCartServiceRoot}GetShoppingCartItemsByUserId/{user.Id}");
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "AvcPgm.UI");
+            var apiKey = _config.GetValue<string>("ApiKeys:ShoppingCartApiKey");
+            request.Headers.Add("ApiKey", apiKey);
 
             var response = await client.SendAsync(request);
 
@@ -140,9 +146,11 @@ namespace Web.Controllers
 
 
             var client = _clientFactory.CreateClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, $"http://localhost:51044/catalogservice/CatalogItem/GetById/{catalogItemId}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_catalogServiceRoot}GetById/{catalogItemId}");
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "AvcPgm.UI");
+            var apiKey = _config.GetValue<string>("ApiKeys:CatalogApiKey");
+            request.Headers.Add("ApiKey", apiKey);
 
             var response = await client.SendAsync(request);
 
@@ -181,6 +189,8 @@ namespace Web.Controllers
             var request = new HttpRequestMessage(HttpMethod.Delete, $"{_shoppingCartServiceRoot}DeleteShoppingCart/{user.Id}");
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "Gamenet.UI");
+            var apiKey = _config.GetValue<string>("ApiKeys:ShoppingCartApiKey");
+            request.Headers.Add("ApiKey", apiKey);
 
             var response = await client.SendAsync(request);
 

@@ -26,6 +26,7 @@ namespace OrderService.Test
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))));
 
             webHostBuilder.UseStartup<Startup>();
+            webHostBuilder.UseConfiguration(configuration);
 
             Server = new TestServer(webHostBuilder);
 

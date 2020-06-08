@@ -19,6 +19,7 @@ namespace Web.Controllers
         private readonly IHttpClientFactory _clientFactory;
         private readonly IConfiguration _config;
         private readonly string _shoppingCartServiceRoot;
+        private readonly string _catalogServiceRoot;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public ShoppingCartController(
@@ -30,14 +31,17 @@ namespace Web.Controllers
             _config = config;
             _userManager = userManager;
             _shoppingCartServiceRoot = _config.GetValue(typeof(string), "ShoppingCartServiceRoot").ToString();
+            _catalogServiceRoot = _config.GetValue(typeof(string), "CatalogServiveRoot").ToString();                      
         }
 
         public async Task<CatalogItemDto> GetCatalogItemById(Guid catalogItemId)
         {
             var client = _clientFactory.CreateClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, $"http://localhost:51044/catalogservice/CatalogItem/GetById/{catalogItemId}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_catalogServiceRoot}GetById/{catalogItemId}");
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "AvcPgm.UI");
+            var apiKey = _config.GetValue<string>("ApiKeys:MySecretApiKey");
+            request.Headers.Add("ApiKey", apiKey);
 
             var response = await client.SendAsync(request);
 
@@ -71,6 +75,8 @@ namespace Web.Controllers
             var itemJson = JsonSerializer.Serialize(item);
             request.Content = new StringContent(itemJson, Encoding.UTF8, "application/json");
             request.Headers.Add("User-Agent", "AvcPgm.UI");
+            var apiKey = _config.GetValue<string>("ApiKeys:ShoppingCartApiKey");
+            request.Headers.Add("ApiKey", apiKey);
             var response = await client.SendAsync(request);
 
             if (!response.IsSuccessStatusCode)
@@ -110,6 +116,8 @@ namespace Web.Controllers
             var request = new HttpRequestMessage(HttpMethod.Get, $"{_shoppingCartServiceRoot}GetShoppingCartItemsByUserId/{user.Id}");
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "AvcPgm.UI");
+            var apiKey = _config.GetValue<string>("ApiKeys:ShoppingCartApiKey");
+            request.Headers.Add("ApiKey", apiKey);
 
             var response = await client.SendAsync(request);
 
