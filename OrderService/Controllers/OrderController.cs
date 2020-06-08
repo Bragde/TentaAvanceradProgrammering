@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OrderService.Data.Entities;
+using OrderService.Filters;
 using OrderService.Models;
 using OrderService.Repositories;
 using System;
@@ -12,6 +13,7 @@ namespace OrderService.Controllers
 {
     [ApiController]
     [Route("OrderService/[controller]/[action]")]
+    [ApiKeyAuth]
     public class OrderController : ControllerBase
     {
         private readonly IOrderRepository _orderRepository;

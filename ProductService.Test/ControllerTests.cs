@@ -19,6 +19,7 @@ namespace CatalogService.Test
         {
             using (var client = new TestClientProvider().Client)
             {
+                client.DefaultRequestHeaders.Add("ApiKey", "MySecretApiKey");
                 var response = await client.GetAsync("CatalogService/CatalogItem/GetAll");
 
                 response.EnsureSuccessStatusCode();
@@ -27,13 +28,27 @@ namespace CatalogService.Test
             }
         }
 
-        [Fact] async Task GetCatalogItemById_ReturnsNotFound()
+        [Fact] 
+        public async Task GetCatalogItemById_ReturnsNotFound()
         {
             using (var client = new TestClientProvider().Client)
             {
+                client.DefaultRequestHeaders.Add("ApiKey", "MySecretApiKey");
                 var response = await client.GetAsync("CatalogService/CatalogItem/GetById/" + Guid.Empty);
 
                 Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            }
+        }
+
+        [Fact]
+        // Test that an http request to the controller without correct apikey will not be allowed access.
+        public async Task HttpRequest_ReturnsUnauthorized()
+        {
+            using (var client = new TestClientProvider().Client)
+            {
+                var response = await client.GetAsync("CatalogService/CatalogItem/GetAll");
+
+                Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
             }
         }
     }

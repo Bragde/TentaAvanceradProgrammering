@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,18 +14,24 @@ namespace Web.Controllers
     public class ProductController : Controller
     {
         private readonly IHttpClientFactory _clientFactory;
+        private readonly IConfiguration _config;
+        private readonly string _catalogServiceRoot;
 
-        public ProductController(IHttpClientFactory clientFactory)
+        public ProductController(IHttpClientFactory clientFactory, IConfiguration config)
         {
             _clientFactory = clientFactory;
+            _config = config;
+            _catalogServiceRoot = _config.GetValue<string>("CatalogServiceRoot").ToString();
         }
 
         public async Task<IActionResult> Index()
         {
             var client = _clientFactory.CreateClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:51044/catalogservice/CatalogItem/GetAll");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_catalogServiceRoot}GetAll");
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "AvcPgm.UI");
+            var apiKey = _config.GetValue<string>("ApiKeys:CatalogApiKey");
+            request.Headers.Add("ApiKey", apiKey);
 
             var response = await client.SendAsync(request);
 
@@ -45,9 +52,11 @@ namespace Web.Controllers
         public async Task<IActionResult> GetById(Guid catalogItemId)
         {
             var client = _clientFactory.CreateClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, $"http://localhost:51044/catalogservice/CatalogItem/GetById/{catalogItemId}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_catalogServiceRoot}GetById/{catalogItemId}");
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "AvcPgm.UI");
+            var apiKey = _config.GetValue<string>("ApiKeys:CatalogApiKey");
+            request.Headers.Add("ApiKey", apiKey);
 
             var response = await client.SendAsync(request);
 
@@ -61,17 +70,6 @@ namespace Web.Controllers
             }
 
             return RedirectToAction("Index");
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

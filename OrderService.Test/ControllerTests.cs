@@ -28,6 +28,7 @@ namespace OrderService.Test
                      OrderTotal = 39.99M
                 };
 
+                client.DefaultRequestHeaders.Add("ApiKey", "MySecretOrderApiKey");
                 var request = new HttpRequestMessage(HttpMethod.Post, $"OrderService/Order/CreateOrder");
                 var orderJson = JsonSerializer.Serialize(order);
                 request.Content = new StringContent(orderJson, Encoding.UTF8, "application/json");
@@ -45,6 +46,7 @@ namespace OrderService.Test
             {
                 var order = new OrderDto();
 
+                client.DefaultRequestHeaders.Add("ApiKey", "MySecretOrderApiKey");
                 var request = new HttpRequestMessage(HttpMethod.Post, $"OrderService/Order/CreateOrder");
                 var orderJson = JsonSerializer.Serialize(order);
                 request.Content = new StringContent(orderJson, Encoding.UTF8, "application/json");
@@ -52,6 +54,24 @@ namespace OrderService.Test
                 var response = await client.SendAsync(request);
 
                 Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            }
+        }
+
+        [Fact]
+        // Test that an http request to the controller without correct apikey will not be allowed access.
+        public async Task HttpRequest_ReturnsUnauthorized()
+        {
+            using (var client = new TestClientProvider().Client)
+            {
+                var order = new OrderDto();
+
+                var request = new HttpRequestMessage(HttpMethod.Post, $"OrderService/Order/CreateOrder");
+                var orderJson = JsonSerializer.Serialize(order);
+                request.Content = new StringContent(orderJson, Encoding.UTF8, "application/json");
+                request.Headers.Add("User-Agent", "AvcPgm.OrderService.Test");
+                var response = await client.SendAsync(request);
+
+                Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
             }
         }
     }
