@@ -50,6 +50,8 @@ namespace Web.Components
             var request = new HttpRequestMessage(HttpMethod.Get, $"{_shoppingCartServiceRoot}GetShoppingCartItemsByUserId/{user}");
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("User-Agent", "AvcPgm.UI");
+            var apiKey = _config.GetValue<string>("ApiKeys:ShoppingCartApiKey");
+            request.Headers.Add("ApiKey", apiKey);
 
             var response = await client.SendAsync(request);
 

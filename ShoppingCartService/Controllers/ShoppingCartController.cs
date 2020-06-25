@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ShoppingCartService.Filters;
 using ShoppingCartService.Models;
 using ShoppingCartService.Repositories;
 
@@ -11,6 +12,7 @@ namespace ShoppingCartService.Controllers
 {
     [ApiController]
     [Route("ShoppingCartService/[controller]/[action]")]
+    [ApiKeyAuth]
     public class ShoppingCartController : ControllerBase
     {
         private readonly IShoppingCartRepository _shoppingCartRepository;
