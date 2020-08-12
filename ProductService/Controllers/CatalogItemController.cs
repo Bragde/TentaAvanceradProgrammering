@@ -6,6 +6,7 @@ using CatalogService.Data.Entities;
 using CatalogService.Filters;
 using CatalogService.Models;
 using CatalogService.Repositories;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -14,6 +15,7 @@ namespace CatalogService.Controllers
     [ApiController]
     [Route("CatalogService/[controller]/[action]")]
     [ApiKeyAuth()]
+    [EnableCors("ReactPolicy")]
     public class CatalogItemController : ControllerBase
     {
         private readonly ICatalogRepository _catalogRepository;

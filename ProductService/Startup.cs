@@ -26,6 +26,12 @@ namespace CatalogService
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddScoped<ICatalogRepository, CatalogRepository>();
+            services.AddCors(o => o.AddPolicy("ReactPolicy", builder =>
+            {
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+            }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -39,6 +45,8 @@ namespace CatalogService
             //app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors("ReactPolicy");
 
             app.UseAuthorization();
 
